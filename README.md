@@ -1,4 +1,3 @@
-# basic-webpack-setup
-Basic webpack setup to test ES6
+# Othello con JavaScript
 
 Librerías de Yarn ya instaladas

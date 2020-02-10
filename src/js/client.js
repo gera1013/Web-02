@@ -62,6 +62,7 @@ const render_celdas = ({
         if(all_possible(index_column, index_row) === true)
         {
             cell = 3
+            STATE.espacios += 1
         }
     }
 
@@ -97,6 +98,7 @@ const check = (index_column, index_row) => {
     if(r == true || l == true || b == true || t == true || br == true || tr == true || bl == true || tl == true)
     {
         STATE.turn = !STATE.turn
+        STATE.espacios = 0
     }
     else
     {
@@ -159,9 +161,6 @@ const possible = (index_column, index_row, pend_x, pend_y, token, others = 0) =>
 
     if(next_cell != null && next_cell != token  && next_cell != 0 && next_cell != 3 && temp_col <= 7 && temp_row <= 7 && temp_col >= 0 && temp_row >= 0)
     {
-        console.log("Primer if")
-        console.log(temp_col)
-        console.log(temp_row)
         const x = possible(temp_col, temp_row, pend_x, pend_y, token, (others + 1))
         if(x == true)
         {
@@ -172,23 +171,14 @@ const possible = (index_column, index_row, pend_x, pend_y, token, others = 0) =>
     {
         if(others == 0)
         {
-            console.log("Others = 0 ")
-            console.log(temp_col)
-            console.log(temp_row)
             result = false
         }
         else if(next_cell === token && temp_col <= 7 && temp_row <= 7 && temp_col >= 0 && temp_row >= 0)
         {
-            console.log("Final if")
-            console.log(temp_col)
-            console.log(temp_row)
             result = true
         }
         else
         {
-            console.log("Else")
-            console.log(temp_col)
-            console.log(temp_row)
             result = false
         }
     }
@@ -220,10 +210,51 @@ const all_possible = (index_column, index_row) => {
     }
 }
 
+const available = () => {
+    if(STATE.espacios === 0)
+    {
+        STATE.turn === true ? alert("Jugador 1 no tiene espacios disponibles, cambio de turno") :
+        alert("Jugador 2 no tiene espacios disponibles, cambio de turno")
+
+        STATE.turn = !STATE.turn
+        root.innerHTML = ''
+        render(root, MATRIX, STATE)
+    }
+}
+
 const render = (mount, matrix) => {
     const contenedor_tablero = document.createElement('div');
     const tablero = matrix.trans_estado;
     STATE.estado = _.zip.apply(_, tablero);
+
+    contenedor_tablero.style.display = 'flex';
+    contenedor_tablero.style.flexFlow = 'initial';
+    contenedor_tablero.style.width = '800px';
+    contenedor_tablero.style.backgroundColor = 'black';
+    contenedor_tablero.style.padding = '4px';
+
+    boton.style.width = '800px';
+    boton.style.height = '40px';
+    boton.style.fontSize = '20px';
+    boton.innerHTML = 'Jugar de nuevo';
+    boton.style.display = 'none';
+    boton.onclick = () => {
+        STATE.estado = [
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,1,2,0,0,0],
+            [0,0,0,2,1,0,0,0],
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0],
+            ];
+        MATRIX.trans_estado = _.zip.apply(_, STATE.estado);
+
+        root.innerHTML = ''
+        render(root, MATRIX, STATE)
+    }
+
     tablero.map(
         (line, index_column) => render_tablero({
             line,
@@ -244,19 +275,25 @@ const render = (mount, matrix) => {
         )
     )
 
-    espacios_vacios === 0 ? jugador_1 > jugador_2 ? 
-    alert("Juego terminado, JUGADOR 1 GANA!!") : alert("Juego terminado, JUGADOR 2 GANA!!") :
-
-    contenedor_tablero.style.display = 'flex';
-    contenedor_tablero.style.flexFlow = 'initial';
-    contenedor_tablero.style.width = '800px';
-    contenedor_tablero.style.backgroundColor = 'black';
-    contenedor_tablero.style.padding = '4px';
-
-    console.log(tablero)
-    console.log(STATE.estado)
-
     mount.appendChild(contenedor_tablero);
+    mount.appendChild(boton);
+
+    if(espacios_vacios === 0)
+    {
+        boton.style.display = 'block';
+        if(jugador_1 > jugador_2)
+        {
+            alert("Juego terminado, JUGADOR 1 GANA!!")
+        }
+        else
+        {
+            alert("Juego terminado, JUGADOR 2 GANA!!")
+        }
+    }
+    else
+    {
+        available()
+    }
 };
 
 const STATE = {
@@ -271,6 +308,7 @@ const STATE = {
         [0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0],
     ],
+    espacios: 0,
 };
 
 const MATRIX = {
@@ -278,5 +316,6 @@ const MATRIX = {
 }
 
 const root = document.getElementById('root');
+const boton = document.createElement('button');
 
 render(root, MATRIX);
